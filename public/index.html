@@ -1,0 +1,54 @@
+﻿<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CSV + Gemini Pro</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <p class="eyebrow">CSV + Gemini Pro (Matematica)</p>
+        <h1>Analise rapida de extratos e faturas</h1>
+        <p class="sub">
+          Envie um ou mais CSVs e receba um resumo em formato CSV pronto para
+          uso.
+        </p>
+      </header>
+
+      <section class="card">
+        <form id="uploadForm">
+          <label class="file">
+            <input id="csvFiles" name="files" type="file" accept=".csv" multiple />
+            <span>Selecionar arquivos CSV</span>
+          </label>
+
+          <div class="actions">
+            <button id="analyzeBtn" type="submit">Analisar</button>
+            <button id="clearBtn" type="button" class="ghost">Limpar</button>
+          </div>
+        </form>
+
+        <div id="status" class="status" aria-live="polite"></div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Resultado (CSV)</h2>
+          <button id="downloadBtn" class="ghost" type="button" disabled>
+            Baixar CSV
+          </button>
+        </div>
+        <textarea id="csvOutput" rows="12" spellcheck="false" placeholder="O resultado aparece aqui..."></textarea>
+      </section>
+
+      <section class="card">
+        <h2>Pre-visualizacao</h2>
+        <div id="preview"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
