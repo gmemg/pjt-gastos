@@ -18,11 +18,39 @@
       </header>
 
       <section class="card">
+        <div class="card-header">
+          <h2>Entrada</h2>
+          <button id="themeToggle" class="ghost icon-btn" type="button" aria-label="Alternar tema">
+            <span class="icon-sun" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="4"></circle>
+                <line x1="12" y1="2" x2="12" y2="5"></line>
+                <line x1="12" y1="19" x2="12" y2="22"></line>
+                <line x1="2" y1="12" x2="5" y2="12"></line>
+                <line x1="19" y1="12" x2="22" y2="12"></line>
+                <line x1="4.2" y1="4.2" x2="6.3" y2="6.3"></line>
+                <line x1="17.7" y1="17.7" x2="19.8" y2="19.8"></line>
+                <line x1="17.7" y1="6.3" x2="19.8" y2="4.2"></line>
+                <line x1="4.2" y1="19.8" x2="6.3" y2="17.7"></line>
+              </svg>
+            </span>
+            <span class="icon-moon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.6A8.5 8.5 0 1 1 11.4 3a6.5 6.5 0 0 0 9.6 9.6Z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+
         <form id="uploadForm">
           <label class="file">
             <input id="csvFiles" name="files" type="file" accept=".csv" multiple />
             <span>Selecionar arquivos CSV</span>
           </label>
+
+          <div id="dropZone" class="drop-zone" aria-label="Arraste os CSVs aqui">
+            Arraste e solte seus CSVs aqui
+          </div>
 
           <div class="actions">
             <button id="analyzeBtn" type="submit">Analisar</button>
@@ -36,10 +64,14 @@
       <section class="card">
         <div class="card-header">
           <h2>Resultado (CSV)</h2>
-          <button id="downloadBtn" class="ghost" type="button" disabled>
-            Baixar CSV
-          </button>
+          <div class="result-actions">
+            <span id="modelUsed" class="model-pill">Modelo: —</span>
+            <button id="downloadBtn" class="ghost" type="button" disabled>
+              Baixar CSV
+            </button>
+          </div>
         </div>
+        <div id="summary" class="summary">Resumo: —</div>
         <textarea id="csvOutput" rows="12" spellcheck="false" placeholder="O resultado aparece aqui..."></textarea>
       </section>
 
@@ -47,8 +79,19 @@
         <h2>Pre-visualizacao</h2>
         <div id="preview"></div>
       </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Historico local</h2>
+          <button id="clearHistoryBtn" class="ghost" type="button">
+            Limpar historico
+          </button>
+        </div>
+        <div id="historyList" class="history"></div>
+      </section>
     </main>
 
+    <script src="vendor/papaparse.min.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
