@@ -43,14 +43,16 @@
         </div>
 
         <form id="uploadForm">
-          <label class="file">
+          <label class="file" id="filePicker">
             <input id="csvFiles" name="files" type="file" accept=".csv" multiple />
             <span>Selecionar arquivos CSV</span>
           </label>
 
-          <div id="dropZone" class="drop-zone" aria-label="Arraste os CSVs aqui">
-            Arraste e solte seus CSVs aqui
+          <div id="dropZone" class="drop-zone" aria-label="Arraste o CSV aqui">
+            Arraste e solte seu CSV aqui ou clique para selecionar
           </div>
+
+          <div id="fileName" class="file-name">Nenhum arquivo selecionado.</div>
 
           <div class="actions">
             <button id="analyzeBtn" type="submit">Analisar</button>
@@ -61,7 +63,7 @@
         <div id="status" class="status" aria-live="polite"></div>
       </section>
 
-      <section class="card">
+      <section id="resultSection" class="card is-hidden">
         <div class="card-header">
           <h2>Resultado (CSV)</h2>
           <div class="result-actions">
@@ -75,12 +77,12 @@
         <textarea id="csvOutput" rows="12" spellcheck="false" placeholder="O resultado aparece aqui..."></textarea>
       </section>
 
-      <section class="card">
+      <section id="previewSection" class="card is-hidden">
         <h2>Pre-visualizacao</h2>
         <div id="preview"></div>
       </section>
 
-      <section class="card">
+      <section id="historySection" class="card is-hidden">
         <div class="card-header">
           <h2>Historico local</h2>
           <button id="clearHistoryBtn" class="ghost" type="button">

@@ -11,6 +11,10 @@ const historyList = document.getElementById("historyList");
 const clearHistoryBtn = document.getElementById("clearHistoryBtn");
 const modelUsedEl = document.getElementById("modelUsed");
 const summaryEl = document.getElementById("summary");
+const fileNameEl = document.getElementById("fileName");
+const resultSection = document.getElementById("resultSection");
+const previewSection = document.getElementById("previewSection");
+const historySection = document.getElementById("historySection");
 
 const HISTORY_KEY = "csv-gemini-history";
 const THEME_KEY = "csv-gemini-theme";
@@ -56,6 +60,8 @@ function splitCsvBlocks(text) {
 }
 
 function detectDelimiter(sample) {
+  const firstLine = sample.split(/\r?\n/)[0] || "";
+  if (firstLine.includes(";")) return ";";
   let comma = 0;
   let semicolon = 0;
   let inQuotes = false;
@@ -158,6 +164,13 @@ function toNumber(value) {
   return Number.isFinite(n) ? n : 0;
 }
 
+function formatBRL(value) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  }).format(value);
+}
+
 function updateSummary(mainBlock) {
   if (!mainBlock || !mainBlock.rows?.length) {
     summaryEl.textContent = "Resumo: —";
@@ -177,9 +190,9 @@ function updateSummary(mainBlock) {
   });
 
   const totalValue = hasTotalRow ? toNumber(lastRow[2]) : total;
-  summaryEl.textContent = `Resumo: ${categories} categorias • Total ${totalValue.toFixed(
-    2,
-  )}`;
+  summaryEl.innerHTML = `<span class=\"summary-label\">Resumo:</span> ${categories} categorias • Total <strong>${formatBRL(
+    totalValue,
+  )}</strong>`;
 }
 
 function updatePreview(csvText) {
@@ -187,6 +200,9 @@ function updatePreview(csvText) {
 
   if (!csvText) {
     summaryEl.textContent = "Resumo: —";
+    resultSection.classList.add("is-hidden");
+    previewSection.classList.add("is-hidden");
+    historySection.classList.add("is-hidden");
     return;
   }
   const parts = splitCsvBlocks(csvText);
@@ -202,6 +218,9 @@ function updatePreview(csvText) {
   }
 
   updateSummary(mainBlock);
+  resultSection.classList.remove("is-hidden");
+  previewSection.classList.remove("is-hidden");
+  historySection.classList.remove("is-hidden");
 }
 
 function downloadCsv(csvText) {
@@ -299,7 +318,7 @@ function setTheme(theme) {
 }
 
 function loadTheme() {
-  const saved = localStorage.getItem(THEME_KEY) || "light";
+  const saved = localStorage.getItem(THEME_KEY) || "night";
   setTheme(saved);
 }
 
@@ -315,6 +334,9 @@ form.addEventListener("submit", async (e) => {
   outputEl.value = "";
   previewEl.innerHTML = "";
   downloadBtn.disabled = true;
+  resultSection.classList.add("is-hidden");
+  previewSection.classList.add("is-hidden");
+  historySection.classList.add("is-hidden");
 
   const formData = new FormData();
   Array.from(files).forEach((f) => formData.append("files", f));
@@ -376,6 +398,10 @@ clearBtn.addEventListener("click", () => {
   downloadBtn.disabled = true;
   modelUsedEl.textContent = "Modelo: —";
   summaryEl.textContent = "Resumo: —";
+  fileNameEl.textContent = "Nenhum arquivo selecionado.";
+  resultSection.classList.add("is-hidden");
+  previewSection.classList.add("is-hidden");
+  historySection.classList.add("is-hidden");
 });
 
 ["dragenter", "dragover"].forEach((evt) => {
@@ -403,6 +429,7 @@ dropZone.addEventListener("drop", (e) => {
   const dt = new DataTransfer();
   files.forEach((f) => dt.items.add(f));
   fileInput.files = dt.files;
+  fileNameEl.textContent = files.map((f) => f.name).join(", ");
   setStatus(`${files.length} arquivo(s) pronto(s) para analisar.`);
 });
 
@@ -418,3 +445,13 @@ clearHistoryBtn.addEventListener("click", () => {
 
 loadTheme();
 renderHistory();
+
+fileInput.addEventListener("change", () => {
+  const files = Array.from(fileInput.files || []);
+  fileNameEl.textContent =
+    files.length > 0 ? files.map((f) => f.name).join(", ") : "Nenhum arquivo selecionado.";
+});
+
+dropZone.addEventListener("click", () => {
+  fileInput.click();
+});

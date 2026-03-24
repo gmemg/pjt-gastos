@@ -17,6 +17,11 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-pro";
 const GEMINI_FALLBACK_MODEL =
   process.env.GEMINI_FALLBACK_MODEL || "gemini-2.5-flash";
+const MAX_CHARS = Number.parseInt(process.env.MAX_CHARS || "120000", 10);
+const MAX_LINES_PER_FILE = Number.parseInt(
+  process.env.MAX_LINES_PER_FILE || "1500",
+  10,
+);
 
 app.use(express.static("public"));
 
@@ -35,14 +40,25 @@ app.post("/api/analyze", upload.array("files"), async (req, res) => {
       return res.status(400).json({ error: "Envie ao menos um arquivo CSV." });
     }
 
+    let truncated = false;
     const combined = files
       .map((f, idx) => {
-        const text = f.buffer.toString("utf8");
+        let text = f.buffer.toString("utf8");
+        const lines = text.split(/\r?\n/);
+        if (lines.length > MAX_LINES_PER_FILE) {
+          text = lines.slice(0, MAX_LINES_PER_FILE).join("\n");
+          truncated = true;
+        }
         return `### ARQUIVO ${idx + 1}: ${f.originalname}\n${text}`;
       })
       .join("\n\n");
+    let trimmedCombined = combined;
+    if (combined.length > MAX_CHARS) {
+      trimmedCombined = combined.slice(0, MAX_CHARS);
+      truncated = true;
+    }
 
-    const prompt = `Este e um prompt que sera usado num site. Os resultados devem ser padronizados em CSV para apresentacao.\n\nAnalise esses CSVs de extratos e faturas. Gere uma tabela com 3 colunas:\n* Categoria – categoria do gasto (ex: Restaurantes, Transferencias pessoais, Servicos e assinaturas).\n* Descricao – resumo breve do que entra na categoria (cite exemplos reais se aparecerem nos CSVs).\n* Valor – total gasto na categoria.\n\nOrganizacao e padronizacao:\n- Normalize nomes de categorias (evite duplicidades por variacao de nome).\n- Some valores por categoria.\n- Ordene da maior para a menor por Valor.\n- Use apenas numero em Valor (ex: 1234.56). Sem moeda, sem separador de milhar.\n- Se fizer sentido, inclua uma linha final de TOTAL (Categoria=TOTAL, Descricao=Total geral, Valor=...)\n\nDetalhamento:\n- Identifique a categoria com gasto mais alto (ou claramente fora da media) e destrinche em um segundo bloco.\n- No detalhamento use as mesmas 3 colunas e valores somados.\n- Se nao houver destaque relevante, nao gere o segundo bloco.\n\nRegras de resposta:\n- Responda APENAS com CSV (sem markdown, sem texto extra).\n- Primeiro bloco: CSV da tabela principal com colunas: Categoria,Descricao,Valor.\n- Linha em branco.\n- Segundo bloco (opcional): CSV de detalhamento com colunas: Categoria,Descricao,Valor.\n\nCSVs a seguir:\n${combined}`;
+    const prompt = `Analise os CSVs e gere uma tabela em CSV com 3 colunas:\n\"Categoria\";\"Descricao\";\"Valor\"\n\nRegras:\n- Use ponto e virgula (;) como delimitador.\n- Envolva TODOS os campos em aspas duplas.\n- Normalize categorias e some valores por categoria.\n- Ordene por Valor desc.\n- Valor deve vir com moeda BRL no formato \"R$ 1.234,56\".\n- Inclua linha TOTAL quando fizer sentido (Categoria=TOTAL, Descricao=Total geral, Valor=R$ ...).\n\nDetalhamento:\n- Gere um segundo bloco CSV com as 3 categorias mais altas (ou mais relevantes) detalhadas.\n- Se nao houver destaque, ainda assim gere as 3 maiores categorias.\n\nResponda APENAS com CSV. Primeiro bloco (tabela principal), linha em branco, segundo bloco (detalhamento).\n${truncated ? "\nObservacao: dados podem estar truncados para reduzir tempo." : ""}\n\nCSVs:\n${trimmedCombined}`;
 
     const body = {
       contents: [
