@@ -844,6 +844,8 @@ app.get(/.*/, (req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor API rodando em http://localhost:${PORT}`);
-  console.log(`Modo Gemini habilitado: ${USE_GEMINI}`);
+  if (process.env.QUIET_DEV !== "true") {
+    console.log(`Servidor API rodando em http://localhost:${PORT}`);
+    console.log(`Modo Gemini habilitado: ${USE_GEMINI}`);
+  }
 });

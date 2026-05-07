@@ -5,9 +5,10 @@
   "type": "module",
   "description": "Analise de faturas CSV/PDF com React, Vite, TypeScript e Gemini",
   "scripts": {
-    "dev": "concurrently -k -n API,WEB -c green,cyan \"npm run dev:api\" \"npm run dev:web\"",
+    "dev": "node scripts/dev.js",
     "dev:api": "node server.js",
     "dev:web": "vite --host 0.0.0.0",
+    "dev:web:silent": "vite --host 0.0.0.0 --clearScreen false --logLevel error",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "start": "node server.js"
